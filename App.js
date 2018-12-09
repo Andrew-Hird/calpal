@@ -7,9 +7,10 @@
  */
 
 import React, {Component} from 'react'
-import {StyleSheet, Text, View, TouchableWithoutFeedback, Keyboard} from 'react-native'
+import {StyleSheet, Text, View, TouchableWithoutFeedback, Keyboard, Clipboard} from 'react-native'
 import Icon from 'react-native-vector-icons/FontAwesome5'
 import { Input } from 'react-native-elements'
+import Toast from 'react-native-root-toast'
 
 type Props = {};
 export default class App extends Component<Props> {
@@ -26,11 +27,19 @@ export default class App extends Component<Props> {
             kj: input,
             cals: this.convertKj(input),
         })
-    };
+    }
 
-    convertKj(kj) {
+    convertKj = (kj) => {
         const cals = kj / 4.184
         return Math.round(cals)
+    }
+
+    copyToClipboard = () => {
+        if (this.state.cals > 0) {
+            Clipboard.setString(this.state.cals.toString())
+            Keyboard.dismiss()
+            Toast.show('Copied to clipboard')
+        }
     }
 
     render() {
@@ -42,7 +51,7 @@ export default class App extends Component<Props> {
                         placeholder='200'
                         onChangeText={this.kjChange}
                         keyboardType='numeric'
-                        shake
+                        clearButtonMode='always'
                         leftIcon={
                             <Icon
                                 name='cookie-bite'
@@ -52,8 +61,8 @@ export default class App extends Component<Props> {
                         }
                     />
                     <View style={styles.cals}>
-                        <Text style={styles.welcome}>Calories {this.state.cals}</Text>
-                        <Text style={styles.emoji}>{this.state.cals < 500 ? '😺' : '😿'}</Text>
+                        <Text style={styles.output} onPress={this.copyToClipboard}>Calories {this.state.cals}</Text>
+                        <Text style={styles.emoji} onPress={this.copyToClipboard}>{this.state.cals < 500 ? '😺' : '😿'}</Text>
                     </View>
                 </View>
             </TouchableWithoutFeedback>
@@ -73,15 +82,10 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
     },
-    welcome: {
-        fontSize: 20,
+    output: {
+        fontSize: 40,
         textAlign: 'center',
         margin: 10,
-    },
-    instructions: {
-        textAlign: 'center',
-        color: '#333333',
-        marginBottom: 5,
     },
     emoji: {
         fontSize: 100
